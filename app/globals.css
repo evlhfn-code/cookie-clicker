@@ -100,3 +100,16 @@ input,textarea{user-select:text;-webkit-user-select:text}
 @keyframes frenzyFlash{to{transform:scale(1.08);text-shadow:0 0 12px #ffd85c,0 2px 3px #000}}
 .grandmaMeter{height:12px;margin:12px 0;background:#30251f;border:1px solid #7b6858;box-shadow:inset 0 2px 4px #000;border-radius:1px;overflow:hidden}
 .grandmaMeter span{display:block;height:100%;background:linear-gradient(90deg,#8e3c28,#d51f16,#ff5d2f);box-shadow:0 0 8px #f32}
+
+/* Milk and achievement progression */
+.milkPanel{position:relative;height:92px;margin:8px 4px 10px;border:2px solid #8e7f6a;border-radius:3px;overflow:hidden;background:linear-gradient(#3b3027,#201a16);box-shadow:inset 0 2px 6px #000,0 1px 2px #fff5}
+.milkLabel{position:absolute;z-index:3;left:10px;right:10px;top:9px;text-align:center;color:#f4ead9;font-family:Merriweather,Georgia,serif;font-size:11px;text-shadow:0 1px 2px #000}
+.milkWave{position:absolute;left:-5%;right:-5%;bottom:-22px;background:linear-gradient(#fff,#d9d5cd);border-radius:50% 50% 0 0;box-shadow:0 -3px 10px #fff8;transition:height .35s ease;animation:milkWave 3s ease-in-out infinite alternate}
+.milkWave:after{content:"";position:absolute;left:0;right:0;top:-12px;height:25px;background:radial-gradient(ellipse at 20% 50%,#fff 0 22%,transparent 23%),radial-gradient(ellipse at 55% 50%,#fff 0 25%,transparent 26%),radial-gradient(ellipse at 85% 50%,#fff 0 21%,transparent 22%);opacity:.9}
+@keyframes milkWave{to{transform:translateX(2%) skewX(-2deg)}}
+.achievement{position:relative;grid-template-columns:30px 1fr auto;align-items:center}
+.achievement em{font-style:normal;font-size:8px;color:#756957;text-align:right}
+.achievement.unlocked{border-color:#b58b3d;background:linear-gradient(#fff8e6,#e2d2ad);box-shadow:inset 0 1px #fff,0 0 0 1px #b58b3d22}
+.achievement.shadowAch{filter:grayscale(.9);background:linear-gradient(#ded8ce,#b9b0a2)}
+.achievement.shadowAch b{color:#5b5147}
+.achievementSummary{text-align:center;color:#665b4f;font-size:10px}
