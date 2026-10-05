@@ -2,243 +2,47 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-const BUILDINGS = [
-  { id:"cursor", name:"Cursor", base:15, cps:0.1, icon:"👆" },
-  { id:"grandma", name:"Grandma", base:100, cps:1, icon:"👵" },
-  { id:"farm", name:"Farm", base:1100, cps:8, icon:"🌾" },
-  { id:"mine", name:"Mine", base:12000, cps:47, icon:"⛏️" },
-  { id:"factory", name:"Factory", base:130000, cps:260, icon:"🏭" },
-  { id:"bank", name:"Bank", base:1400000, cps:1400, icon:"🏦" },
-  { id:"temple", name:"Temple", base:20000000, cps:7800, icon:"🏛️" },
-  { id:"wizard", name:"Wizard Tower", base:330000000, cps:44000, icon:"🧙" },
-  { id:"shipment", name:"Shipment", base:5100000000, cps:260000, icon:"🚀" },
-  { id:"alchemy", name:"Alchemy Lab", base:75000000000, cps:1600000, icon:"⚗️" }
-];
+const ICONS=["👆","👵","🌾","⛏️","🏭","🏦","🏛️","🧙","🚀","⚗️","🧬","🌀","🌌","🤖","🛰️","🪐","🌋","🧊","⚡","🧠","🔮","🕳️","☀️","🌙","👽","🛸","🐉","🏰","🗿","💎"];
+const NAMES=["Cursor","Baker","Grandma","Farm","Mine","Factory","Bank","Temple","Wizard Tower","Shipment","Alchemy Lab","Portal","Time Machine","Antimatter Condenser","Prism","Chancemaker","Fractal Engine","Javascript Console","Idleverse","Cortex Baker","Quantum Oven","Dream Forge","Star Bakery","Nebula Harvester","Dimension Mill","Chrono Bakery","Reality Printer","Multiverse Loom","Infinity Engine","Omnifactory","Cookie Singularity","Cosmic Kitchen","Void Brewery","Dragon Bakery","Ancient Archive","Mythic Machine","Astral Foundry","Quantum Hive","Universal Bakery","Paradox Plant","Eternal Workshop","Genesis Engine","Hypernova Oven","World Eater","Pocket Universe","Reality Compiler","Grand Archive","Omega Bakery","Absolute Oven","Transcendent Factory","Celestial Forge","Infinite Orchard","Starlight Mine","Galaxy Bank","Cosmic Temple","Oracle Tower","Wormhole Express","Dark Matter Lab","Singularity Farm","Time Orchard","Dream Factory","Memory Bank","Thought Temple","Mind Wizard","Idea Shipment","Concept Lab","Story Engine","Myth Factory","Legend Bank","Hero Temple","Titan Tower","God Machine","Heaven Forge","Afterlife Bakery","Soul Factory","Eternity Bank","Infinity Temple","Creation Engine","Chaos Lab","Order Factory","Fate Bank","Destiny Tower","Luck Machine","Fortune Forge","Probability Farm","Chance Engine","Miracle Maker","Wish Factory","Magic Bank","Wonder Temple","Mystery Tower","Secret Lab","Unknown Engine","Impossible Machine","Beyond Bakery","Absolute Reality","The Last Cookie","The First Cookie","The Cookieverse","Omniversal Oven"];
+const BUILDINGS=NAMES.map((name,i)=>({id:"b"+i,name,base:Math.max(15,Math.floor(15*Math.pow(1.15,i))),cps:i===0?.1:Math.pow(10,i/5)*.8,icon:ICONS[i%ICONS.length]}));
+const UPGRADE_NAMES=["Reinforced Finger","Steel Rolling Pin","Golden Dough","Quantum Flour","Chrome Oven","Baker's Gloves","Double Mixer","Turbo Kneader","Cookie Magnet","Lucky Apron","Royal Recipe","Ancient Recipe","Cosmic Recipe","Perfect Temperature","Infinite Yeast","Time-Sliced Dough","Matter Flour","Antimatter Sugar","Dream Frosting","Reality Icing"];
+const UPGRADES=Array.from({length:200},(_,i)=>{const tier=Math.floor(i/20),kind=i%3;const value=kind===0?Math.max(1,Math.floor(Math.pow(2,tier/2))):kind===1?.05+tier*.02:.02+tier*.01;return{id:"u"+i,name:UPGRADE_NAMES[i%20]+" "+(i+1),desc:kind===0?"+1 to +"+value+" cookies per click":kind===1?"+"+Math.round(value*100)+"% cookie production":"+"+Math.round(value*100)+"% golden rewards",cost:Math.floor(100*Math.pow(1.62,i)),kind,value};});
+const ACHIEVEMENTS=[["first","First Batch",1],["hundred","Cookie Century",100],["thousand","Cookie Hoarder",1000],["million","Millionaire",1e6],["billion","Billionaire",1e9],["trillion","Trillionaire",1e12],["build10","Small Factory",10],["build100","Industrialist",100],["build1000","Mega Empire",1000],["click100","Busy Hands",100],["click1000","Clickstorm",1000],["gold10","Golden Touch",10],["gold100","Gold Rush",100],["upgrade25","Researcher",25],["upgrade100","Master Baker",100],["ascend1","Beyond Time",1],["combo25","Combo Master",25],["combo100","Combo Legend",100]];
+const fresh=()=>({cookies:0,total:0,buildings:{},clickPower:1,multiplier:1,purchased:[],clicks:0,goldenClicks:0,combo:0,bestCombo:0,heaven:0,research:0,last:Date.now(),baseCps:0});
 
-const UPGRADES = [
-  { id:"finger", name:"Reinforced Finger", desc:"+1 cookie per click", cost:100, kind:"click", value:1 },
-  { id:"gloves", name:"Baking Gloves", desc:"+5 cookies per click", cost:1000, kind:"click", value:5 },
-  { id:"oven", name:"Better Oven", desc:"+25% cookie production", cost:5000, kind:"mult", value:0.25 },
-  { id:"turbo", name:"Turbo Mixers", desc:"+100% cookie production", cost:50000, kind:"mult", value:1 }
-];
+function fmt(n){if(!Number.isFinite(n))return"∞";if(n<1000)return Math.floor(n).toLocaleString();const units=["K","M","B","T","Qa","Qi","Sx","Sp","Oc","No","Dc","Ud","Dd","Td","Qad","Qid","Sxd","Spd","Ocd","Nod"];let i=-1,v=n;while(v>=1000&&i<units.length-1){v/=1000;i++;}return(v>=100?Math.floor(v):v>=10?v.toFixed(1):v.toFixed(2))+units[i];}
 
-const ACHIEVEMENTS = [
-  ["first","First Batch","Bake 1 cookie.",1],
-  ["hundred","Cookie Century","Bake 100 cookies.",100],
-  ["thousand","Cookie Hoarder","Bake 1,000 cookies.",1000],
-  ["million","Millionaire","Bake 1,000,000 cookies.",1000000],
-  ["tenmillion","Cookie Tycoon","Bake 10,000,000 cookies.",10000000]
-];
-
-function fmt(n) {
-  if (n < 1000) return Math.floor(n).toLocaleString();
-  const units = ["K","M","B","T","Qa","Qi","Sx","Sp","Oc","No"];
-  let i = -1, value = n;
-  while (value >= 1000 && i < units.length - 1) { value /= 1000; i++; }
-  return (value >= 100 ? value.toFixed(0) : value >= 10 ? value.toFixed(1) : value.toFixed(2)) + units[i];
+export default function Home(){
+ const [g,setG]=useState(fresh);const[loaded,setLoaded]=useState(false);const[tab,setTab]=useState("shop");const[pops,setPops]=useState([]);const[golden,setGolden]=useState(null);const[buff,setBuff]=useState(null);const[toast,setToast]=useState("");const[buyMode,setBuyMode]=useState(1);
+ const owned=useMemo(()=>Object.values(g.buildings).reduce((a,b)=>a+b,0),[g.buildings]);
+ const baseCps=useMemo(()=>BUILDINGS.reduce((s,b)=>s+(g.buildings[b.id]||0)*b.cps,0),[g.buildings]);
+ const upgradeMult=1+g.purchased.reduce((s,id)=>{const u=UPGRADES.find(x=>x.id===id);return s+(u&&u.kind===1?u.value:0)},0);
+ const cps=baseCps*g.multiplier*upgradeMult*(buff?.kind==="frenzy"?7:1)*(1+g.heaven*.05);
+ const clickValue=g.clickPower*g.multiplier*(buff?.kind==="click"?7:1)*(1+g.combo*.01);
+ useEffect(()=>{try{const s=JSON.parse(localStorage.getItem("cookie-clicker-save"));if(s){const elapsed=Math.min(86400,Math.max(0,(Date.now()-(s.last||Date.now()))/1000));const offline=(s.baseCps||0)*elapsed*.5;setG({...fresh(),...s,cookies:(s.cookies||0)+offline,total:(s.total||0)+offline,last:Date.now()});}}catch{}setLoaded(true)},[]);
+ useEffect(()=>{if(!loaded)return;const t=setInterval(()=>setG(x=>({...x,cookies:x.cookies+cps/20,total:x.total+cps/20,last:Date.now(),baseCps:cps})),50);return()=>clearInterval(t)},[loaded,cps]);
+ useEffect(()=>{if(!loaded)return;const t=setInterval(()=>localStorage.setItem("cookie-clicker-save",JSON.stringify({...g,baseCps:cps,last:Date.now()})),3000);return()=>clearInterval(t)},[g,cps,loaded]);
+ useEffect(()=>{const t=setInterval(()=>{if(!golden&&Math.random()<.018)setGolden({x:7+Math.random()*86,y:14+Math.random()*68,type:Math.random()<.15?"chain":"normal"});},1000);return()=>clearInterval(t)},[golden]);
+ function notify(s){setToast(s);setTimeout(()=>setToast(""),2400)}
+ function bake(e){const amount=clickValue;const r=e.currentTarget.getBoundingClientRect();const p={id:Date.now()+Math.random(),x:e.clientX-r.left,y:e.clientY-r.top,amount};setPops(v=>[...v,p]);setTimeout(()=>setPops(v=>v.filter(q=>q.id!==p.id)),650);setG(x=>({...x,cookies:x.cookies+amount,total:x.total+amount,clicks:x.clicks+1,combo:Math.min(100,x.combo+1),bestCombo:Math.max(x.bestCombo,Math.min(100,x.combo+1))}));}
+ useEffect(()=>{const t=setInterval(()=>setG(x=>({...x,combo:Math.max(0,x.combo-.5)})),100);return()=>clearInterval(t)},[]);
+ function buyBuilding(b){const have=g.buildings[b.id]||0;let count=buyMode==="max"?0:buyMode,cost=0;while((buyMode==="max"?count<100:count>0)){const c=Math.floor(b.base*Math.pow(1.15,have+(buyMode==="max"?count:buyMode-count)));if(g.cookies<cost+c)break;cost+=c;if(buyMode!=="max"){count--;if(count===0)break}else count++;}const n=buyMode==="max"?count:buyMode;if(!n||g.cookies<cost)return;setG(x=>({...x,cookies:x.cookies-cost,buildings:{...x.buildings,[b.id]:have+n}}));}
+ function buyUpgrade(u){if(g.purchased.includes(u.id)||g.cookies<u.cost)return;setG(x=>({...x,cookies:x.cookies-u.cost,purchased:[...x.purchased,u.id],clickPower:u.kind===0?x.clickPower+u.value:x.clickPower,multiplier:u.kind===1?x.multiplier*(1+u.value):x.multiplier}));notify("Upgrade unlocked: "+u.name);}
+ function goldenHit(){if(!golden)return;let gain=777*(1+g.goldenClicks*.02);if(golden.type==="chain")gain*=Math.max(2,g.combo+2);setGolden(null);setG(x=>({...x,cookies:x.cookies+gain,total:x.total+gain,goldenClicks:x.goldenClicks+1}));const k=Math.random()<.45?"click":"frenzy";setBuff({kind:k});setTimeout(()=>setBuff(null),15000);notify(k==="frenzy"?"7× PRODUCTION FRENZY!":"7× CLICK FRENZY!");}
+ function ascend(){const gain=Math.floor(Math.cbrt(g.total/1e6));if(gain<=g.heaven)return notify("Not enough cosmic progress to ascend.");if(!confirm("Ascend? Your bakery resets, but you gain "+(gain-g.heaven)+" permanent heavenly levels."))return;setG(x=>({...fresh(),heaven:gain,last:Date.now()}));notify("Ascended beyond reality.");}
+ function reset(){if(!confirm("Delete this bakery forever?"))return;localStorage.removeItem("cookie-clicker-save");setG(fresh());}
+ const unlock=a=>a[0].startsWith("build")?owned>=a[2]:a[0].startsWith("click")?g.clicks>=a[2]:a[0].startsWith("gold")?g.goldenClicks>=a[2]:a[0].startsWith("upgrade")?g.purchased.length>=a[2]:a[0].startsWith("ascend")?g.heaven>=a[2]:a[0].startsWith("combo")?g.bestCombo>=a[2]:g.total>=a[2];
+ return <main className="game"><header><div><h1>COOKIE<span>REALMS</span></h1><small>An original infinite incremental bakery</small></div><div className="stats"><b>{fmt(g.cookies)}<small>cookies</small></b><b>{fmt(cps)}<small>per second</small></b><b>{fmt(g.heaven)}<small>heaven</small></b></div></header>
+ {toast&&<div className="toast">{toast}</div>}<nav className="tabs">{["shop","upgrades","achievements","research","ascension","stats"].map(x=><button className={tab===x?"active":""} onClick={()=>setTab(x)} key={x}>{x.toUpperCase()}</button>)}</nav>
+ <section className="layout"><div className="main"><div className={"stage "+(buff?"buffed":"")}><label>TOTAL BAKED: {fmt(g.total)} • COMBO: {g.combo.toFixed(0)}</label><button className="cookieBtn" onClick={bake} aria-label="Bake cookie">🍪</button>{pops.map(p=><i key={p.id} style={{left:p.x,top:p.y}}>+{fmt(p.amount)}</i>)}{golden&&<button className={"golden "+golden.type} style={{left:golden.x+"%",top:golden.y+"%"}} onClick={goldenHit}>✨</button>}{buff&&<strong className="frenzy">{buff.kind==="frenzy"?"7× PRODUCTION FRENZY":"7× CLICK FRENZY"}</strong>}</div>
+ <p className="power">+{fmt(clickValue)} per click • {fmt(cps)}/sec • {g.purchased.length}/200 upgrades</p><div className="actions"><button onClick={()=>setBuyMode(buyMode==="max"?1:buyMode+1)}>BUY: {buyMode==="max"?"MAX":buyMode}×</button><button onClick={ascend}>ASCEND</button><button onClick={reset}>RESET</button></div></div>
+ <aside className="shop">{tab==="shop"&&<><h2>🏭 100 BUILDINGS</h2>{BUILDINGS.map(b=>{const n=g.buildings[b.id]||0,cost=Math.floor(b.base*Math.pow(1.15,n));return <button className={"building "+(g.cookies>=cost?"ok":"")} key={b.id} onClick={()=>buyBuilding(b)}><span>{b.icon}</span><div><b>{b.name}</b><small>{fmt(b.cps)} / sec each</small></div><div className="right"><b>{n}</b><small>🍪 {fmt(cost)}</small></div></button>})}</>}
+ {tab==="upgrades"&&<><h2>🧪 200 UPGRADES</h2>{UPGRADES.map(u=>{const done=g.purchased.includes(u.id);return <button className={"building "+(done?"done":g.cookies>=u.cost?"ok":"")} disabled={done} key={u.id} onClick={()=>buyUpgrade(u)}><span>{done?"✅":"⬆️"}</span><div><b>{u.name}</b><small>{done?"Purchased":u.desc}</small></div><div className="right"><small>{done?"DONE":"🍪 "+fmt(u.cost)}</small></div></button>})}</>}
+ {tab==="achievements"&&<><h2>🏆 MILESTONES</h2>{ACHIEVEMENTS.map(a=><div className={"achievement "+(unlock(a)?"unlocked":"")} key={a[0]}><span>{unlock(a)?"🏆":"🔒"}</span><div><b>{a[1]}</b><small>Target: {fmt(a[2])}</small></div></div>)}</>}
+ {tab==="research"&&<Research g={g} setG={setG}/>}
+ {tab==="ascension"&&<div className="research"><h2>🌌 ASCENSION</h2><p>Turn lifetime bakery power into permanent cosmic progression.</p><h3>{fmt(Math.floor(Math.cbrt(g.total/1e6)))} heavenly levels</h3><p>Each level grants +5% production after the reset.</p><button className="bigBtn" onClick={ascend}>ASCEND NOW</button></div>}
+ {tab==="stats"&&<div className="research"><h2>📊 BAKERY DATA</h2><p>Total baked: <b>{fmt(g.total)}</b></p><p>Clicks: <b>{fmt(g.clicks)}</b></p><p>Golden cookies: <b>{fmt(g.goldenClicks)}</b></p><p>Best combo: <b>{fmt(g.bestCombo)}</b></p><p>Buildings: <b>{fmt(owned)}</b></p><p>Upgrades: <b>{g.purchased.length}/200</b></p><p>Heavenly levels: <b>{fmt(g.heaven)}</b></p><p>Production multiplier: <b>×{(g.multiplier*upgradeMult*(1+g.heaven*.05)).toFixed(2)}</b></p></div>}</aside></section>
+ <footer>COOKIE REALMS • 100 buildings • 200 upgrades • prestige • research • golden events • offline progress • local saves</footer></main>;
 }
 
-export default function Home() {
-  const [cookies,setCookies] = useState(0);
-  const [total,setTotal] = useState(0);
-  const [buildings,setBuildings] = useState({});
-  const [clickPower,setClickPower] = useState(1);
-  const [multiplier,setMultiplier] = useState(1);
-  const [purchased,setPurchased] = useState([]);
-  const [pops,setPops] = useState([]);
-  const [golden,setGolden] = useState(null);
-  const [buff,setBuff] = useState(null);
-  const [loaded,setLoaded] = useState(false);
-
-  const baseCps = useMemo(
-    () => BUILDINGS.reduce((sum,b) => sum + (buildings[b.id] || 0) * b.cps, 0),
-    [buildings]
-  );
-  const cps = baseCps * multiplier * (buff?.kind === "frenzy" ? 7 : 1);
-  const buildingCount = Object.values(buildings).reduce((sum,n) => sum + n, 0);
-
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem("cookie-clicker-save"));
-      if (saved) {
-        setCookies(saved.cookies || 0);
-        setTotal(saved.total || 0);
-        setBuildings(saved.buildings || {});
-        setClickPower(saved.clickPower || 1);
-        setMultiplier(saved.multiplier || 1);
-        setPurchased(saved.purchased || []);
-      }
-    } catch {}
-    setLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    if (!loaded) return;
-    const timer = setInterval(() => {
-      const amount = cps / 10;
-      setCookies(v => v + amount);
-      setTotal(v => v + amount);
-    }, 100);
-    return () => clearInterval(timer);
-  }, [cps,loaded]);
-
-  useEffect(() => {
-    if (!loaded) return;
-    const timer = setInterval(() => {
-      localStorage.setItem("cookie-clicker-save", JSON.stringify({
-        cookies,total,buildings,clickPower,multiplier,purchased
-      }));
-    }, 3000);
-    return () => clearInterval(timer);
-  }, [cookies,total,buildings,clickPower,multiplier,purchased,loaded]);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (!golden && Math.random() < 0.025) {
-        setGolden({ x:8 + Math.random()*84, y:15 + Math.random()*65 });
-      }
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [golden]);
-
-  function bake(e) {
-    const amount = clickPower * (buff?.kind === "click" ? 7 : 1);
-    const rect = e.currentTarget.getBoundingClientRect();
-    const pop = {
-      id: Date.now() + Math.random(),
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-      amount
-    };
-    setPops(v => [...v,pop]);
-    setCookies(v => v + amount);
-    setTotal(v => v + amount);
-    setTimeout(() => setPops(v => v.filter(p => p.id !== pop.id)), 700);
-  }
-
-  function buyBuilding(b) {
-    const owned = buildings[b.id] || 0;
-    const cost = Math.floor(b.base * Math.pow(1.15, owned));
-    if (cookies < cost) return;
-    setCookies(v => v - cost);
-    setBuildings(v => ({...v,[b.id]:owned+1}));
-  }
-
-  function buyUpgrade(u) {
-    if (purchased.includes(u.id) || cookies < u.cost) return;
-    setCookies(v => v - u.cost);
-    setPurchased(v => [...v,u.id]);
-    if (u.kind === "click") setClickPower(v => v + u.value);
-    if (u.kind === "mult") setMultiplier(v => v * (1 + u.value));
-  }
-
-  function clickGolden() {
-    setGolden(null);
-    setCookies(v => v + 777);
-    setTotal(v => v + 777);
-    const kind = Math.random() < 0.35 ? "click" : "frenzy";
-    setBuff({kind});
-    setTimeout(() => setBuff(null),15000);
-  }
-
-  function reset() {
-    if (!confirm("Reset your cookie empire?")) return;
-    localStorage.removeItem("cookie-clicker-save");
-    setCookies(0); setTotal(0); setBuildings({});
-    setClickPower(1); setMultiplier(1); setPurchased([]);
-    setBuff(null);
-  }
-
-  return (
-    <main className="game">
-      <header>
-        <div>
-          <h1>COOKIE<span>CLICKER</span></h1>
-          <small>Bake. Upgrade. Repeat.</small>
-        </div>
-        <div className="stats">
-          <b>{fmt(cookies)}<small>cookies</small></b>
-          <b>{fmt(cps)}<small>per second</small></b>
-        </div>
-      </header>
-
-      <section className="layout">
-        <div className="main">
-          <div className="stage">
-            <label>COOKIES BAKED: {fmt(total)}</label>
-            <button className="cookieBtn" onClick={bake} aria-label="Bake cookie">🍪</button>
-            {pops.map(p => <i key={p.id} style={{left:p.x,top:p.y}}>+{fmt(p.amount)}</i>)}
-            {golden && (
-              <button
-                className="golden"
-                style={{left:golden.x+"%",top:golden.y+"%"}}
-                onClick={clickGolden}
-                aria-label="Golden cookie"
-              >✨</button>
-            )}
-            {buff && <strong className="frenzy">
-              {buff.kind === "frenzy" ? "7× COOKIE FRENZY!" : "7× CLICK FRENZY!"}
-            </strong>}
-          </div>
-          <p className="power">+{fmt(clickPower)} per click • ×{multiplier.toFixed(2)} production</p>
-          <div className="actions"><button onClick={reset}>Reset Save</button></div>
-        </div>
-
-        <aside className="shop">
-          <h2>BUILDINGS</h2>
-          {BUILDINGS.map(b => {
-            const owned = buildings[b.id] || 0;
-            const cost = Math.floor(b.base * Math.pow(1.15,owned));
-            const affordable = cookies >= cost;
-            return (
-              <button className={"building " + (affordable ? "ok" : "")} key={b.id} onClick={() => buyBuilding(b)}>
-                <span>{b.icon}</span>
-                <div><b>{b.name}</b><small>{fmt(b.cps)} cookies/sec each</small></div>
-                <div className="right"><b>{owned}</b><small>🍪 {fmt(cost)}</small></div>
-              </button>
-            );
-          })}
-        </aside>
-      </section>
-
-      <section className="bottom">
-        <div className="panel">
-          <h2>🧪 UPGRADES</h2>
-          {UPGRADES.map(u => {
-            const done = purchased.includes(u.id);
-            return (
-              <button className={"building " + (done ? "ok" : "")} disabled={done || cookies < u.cost} key={u.id} onClick={() => buyUpgrade(u)}>
-                <span>{done ? "✅" : "⬆️"}</span>
-                <div><b>{u.name}</b><small>{done ? "Purchased" : u.desc}</small></div>
-                <div className="right"><small>{done ? "DONE" : "🍪 " + fmt(u.cost)}</small></div>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="panel">
-          <h2>🏆 ACHIEVEMENTS</h2>
-          {ACHIEVEMENTS.map(a => {
-            const unlocked = total >= a[3];
-            return <div className={"achievement " + (unlocked ? "unlocked" : "")} key={a[0]}>
-              <span>{unlocked ? "🏆" : "🔒"}</span>
-              <div><b>{a[1]}</b><small>{a[2]}</small></div>
-            </div>;
-          })}
-        </div>
-
-        <div className="panel">
-          <h2>📊 STATS</h2>
-          <p>Total baked: <b>{fmt(total)}</b></p>
-          <p>Buildings owned: <b>{buildingCount}</b></p>
-          <p>Base production: <b>{fmt(baseCps)}/sec</b></p>
-          <p>Current production: <b>{fmt(cps)}/sec</b></p>
-          <p>Click power: <b>{fmt(clickPower)}</b></p>
-          <p>Golden cookies trigger temporary buffs.</p>
-        </div>
-      </section>
-
-      <footer>Original incremental-game implementation • Auto-saves locally</footer>
-    </main>
-  );
-}
+function Research({g,setG}){const nodes=[["r1","Efficient Ovens","+10% production",100],["r2","Golden Radar","+10% golden rewards",500],["r3","Quantum Hands","+25% click power",2000],["r4","Time Compression","+50% offline efficiency",10000],["r5","Reality Baking","+100% production",50000],["r6","Infinite Research","+250% production",500000]];return <div className="research"><h2>🔬 RESEARCH LAB</h2><p>Research points: <b>{fmt(g.research)}</b></p>{nodes.map(n=><button className="researchNode" key={n[0]} onClick={()=>{if(g.research<n[3])return;setG(x=>({...x,research:x.research-n[3],multiplier:x.multiplier*1.1}))}}><b>{n[1]}</b><small>{n[2]} • {fmt(n[3])} RP</small></button>)}<button className="bigBtn" onClick={()=>setG(x=>({...x,research:x.research+Math.max(1,Math.floor(x.total/1e6))}))}>CONVERT POWER → RESEARCH</button></div>}
