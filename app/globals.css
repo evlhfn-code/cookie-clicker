@@ -138,3 +138,6 @@ input,textarea{user-select:text;-webkit-user-select:text}
 .gardenControls{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
 .gardenControls .bigBtn{font-size:9px;padding:7px 3px}
 @media(max-width:520px){.seedList{grid-template-columns:1fr}.gardenGrid{gap:2px}.gardenTile{min-height:40px;font-size:7px}.gardenControls{grid-template-columns:1fr}}
+
+.macroConsole{margin:8px 4px;padding:7px 9px;background:linear-gradient(#26201b,#100d0b);border:1px solid #695542;box-shadow:inset 0 1px #ffffff12;color:#d7c6ad;font-family:Tahoma,Arial,sans-serif;font-size:9px;text-align:left}
+.macroConsole b,.macroConsole small{display:block}.macroConsole b{font-family:Merriweather,Georgia,serif;color:#f1dfbf;font-size:10px;margin-bottom:3px}.macroConsole small{color:#9f927f;line-height:1.45}
