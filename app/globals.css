@@ -113,3 +113,17 @@ input,textarea{user-select:text;-webkit-user-select:text}
 .achievement.shadowAch{filter:grayscale(.9);background:linear-gradient(#ded8ce,#b9b0a2)}
 .achievement.shadowAch b{color:#5b5147}
 .achievementSummary{text-align:center;color:#665b4f;font-size:10px}
+
+/* Animated in-world building displays */
+.buildingDisplay{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.displaySprite{position:absolute;left:50%;top:50%;font-size:24px;line-height:1;filter:drop-shadow(0 3px 3px #000);transform:translate(-50%,-50%) rotate(var(--angle)) translateX(var(--radius)) rotate(calc(var(--angle) * -1));animation:buildingFloat 3.2s ease-in-out infinite;animation-delay:calc(var(--j) * -.23s);opacity:.82}
+.displaySprite:after{content:"";position:absolute;inset:-5px;border-radius:50%;background:#fff0;animation:buildingGlow 2.4s ease-in-out infinite}
+.building-0{font-size:27px;filter:drop-shadow(0 2px 2px #000) drop-shadow(0 0 4px #ffe5a0)}
+.building-0.cursorTap{animation:cursorTap .42s ease-in-out 1}
+.building-1{font-size:28px}.building-2{font-size:26px}.building-3{font-size:25px}.building-4{font-size:27px}.building-5{font-size:26px}.building-6{font-size:29px}.building-7{font-size:28px}.building-8{font-size:27px}.building-9{font-size:25px}
+.displaySprite:nth-child(3n){animation-duration:3.8s}.displaySprite:nth-child(4n){animation-duration:2.7s}.displaySprite:nth-child(5n){opacity:.65}
+@keyframes buildingFloat{0%,100%{margin-top:-2px;scale:1}50%{margin-top:4px;scale:1.06}}
+@keyframes buildingGlow{50%{box-shadow:0 0 13px #ffd76a55}}
+@keyframes cursorTap{0%{margin-top:0;scale:1}35%{margin-top:14px;scale:.88}65%{margin-top:-4px;scale:1.08}100%{margin-top:0;scale:1}}
+.buildingHint{height:18px;margin:0;text-align:center;color:#66594a;font-size:9px;opacity:.75}
+@media(max-width:520px){.displaySprite{font-size:19px}.building-0{font-size:22px}.buildingHint{font-size:8px}}
