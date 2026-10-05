@@ -129,3 +129,12 @@ input,textarea{user-select:text;-webkit-user-select:text}
 @media(max-width:520px){.displaySprite{font-size:19px}.building-0{font-size:22px}.buildingHint{font-size:8px}}
 
 .autoOn{background:linear-gradient(#9d3328,#5f1712)!important;color:#fff!important;box-shadow:inset 0 1px #ff9b7f,0 0 10px #ff3d2e66!important}.actions button:first-child{font-weight:700}
+.seedList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin:8px 0}
+.seedCard{min-height:54px;text-align:left;border:1px solid #9b8b74;background:linear-gradient(#f5ead7,#d7c7aa);color:#3b3128;padding:6px;cursor:pointer;box-shadow:inset 0 1px #fff}
+.seedCard b,.seedCard small{display:block}.seedCard small{font-size:8px;margin-top:3px;color:#756758}.seedCard.selected{border-color:#9b5d22;box-shadow:inset 0 0 0 1px #e6a65c,0 0 5px #9b5d2244}.seedCard.locked{filter:grayscale(1);opacity:.55}
+.gardenGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin:8px 0;background:#4a392b;padding:5px;border:2px solid #8e7257;box-shadow:inset 0 2px 5px #000}
+.gardenTile{min-height:46px;padding:3px 2px;border:1px solid #927654;background:linear-gradient(#786342,#4f3e2c);color:#f4ead9;font-size:8px;text-shadow:0 1px 2px #000;cursor:pointer}
+.gardenTile b,.gardenTile small{display:block}.gardenTile small{font-size:7px;color:#d6c4a8;margin-top:2px}.gardenTile.mature{background:linear-gradient(#8b733f,#5d431f);border-color:#d6a94d;box-shadow:0 0 5px #e0ad4c66}
+.gardenControls{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.gardenControls .bigBtn{font-size:9px;padding:7px 3px}
+@media(max-width:520px){.seedList{grid-template-columns:1fr}.gardenGrid{gap:2px}.gardenTile{min-height:40px;font-size:7px}.gardenControls{grid-template-columns:1fr}}
