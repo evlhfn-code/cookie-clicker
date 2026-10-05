@@ -71,3 +71,12 @@ header small{display:block;color:#aaa;margin-top:6px;font-size:11px}
 footer{text-align:center;color:#555;font-size:10px;padding:14px;background:#090909}
 @media(max-width:900px){.layout{grid-template-columns:1fr}.shop{max-height:none}.stage{height:470px}.stats{gap:12px}}
 @media(max-width:520px){.game>header{height:auto;min-height:70px;padding:8px 10px}.stats{gap:8px}.stats b{font-size:14px}.stage{height:380px}.cookieBtn{width:240px;height:240px}.tabs button{font-size:9px;padding:7px}.megaGrid{grid-template-columns:repeat(2,1fr)}}
+
+/* Mobile-friendly anti-copy / anti-long-press interaction */
+html,body,.game,.stage,.shop,.tabs,button,h1,h2,h3,p,small,b,strong,i,span,label,footer{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+img,svg{user-select:none;-webkit-user-select:none;-webkit-user-drag:none;pointer-events:none}
+input,textarea{user-select:text;-webkit-user-select:text}
+.goldenUpgradeHeader{margin:12px 4px 6px;padding:7px 9px;border-top:1px solid #8e7b62;border-bottom:1px solid #8e7b62;background:linear-gradient(#c8b89f,#a99880);color:#3b2818;font-family:Merriweather,Georgia,serif;font-size:11px;text-align:center;text-shadow:0 1px #fff}
+.goldenUpgrade{border-color:#b58b3d;background:linear-gradient(#fff6d9,#dfc98e);}
+.goldenUpgrade.ok{box-shadow:inset 0 1px #fff,0 0 0 1px #b58b3d,0 1px 3px #80622b}
+.goldenUpgrade>span{filter:drop-shadow(0 0 3px #ffd84d)}
