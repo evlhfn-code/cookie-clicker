@@ -51,7 +51,7 @@ export default function Home(){
  const kittenMult=useMemo(()=>KITTEN_UPGRADES.reduce((m,k,i)=>(g.purchasedKittens||[]).includes(k.id)?m*(1+milk*k.factor):m,1),[g.purchasedKittens,milk]);
  const upgradeMult=1+g.purchased.reduce((s,id)=>{const u=UPGRADES.find(x=>x.id===id);return s+(u&&u.kind===1?u.value:0)},0);
  const seasonNames=["Harvest","Frost","Arcane","Cosmic","Festival"];const season=seasonNames[g.season%seasonNames.length];const plantMult=1+g.plants.length*.08;const wrathDrain=wrinklers.reduce((a,w)=>a+w.drain,0);
- const buffMult=buff?.kind==="frenzy"?7:buff?.kind==="elderFrenzy"?666:buff?.kind==="bloodFrenzy"?6:buff?.kind==="clot"?.5:buff?.kind==="buildingSpecial"?buff.mult:buff?.kind==="cursedFinger"?0:1;
+ const buffMult=buff?.kind==="frenzy"?7:buff?.kind==="elderFrenzy"?666:buff?.kind==="bloodFrenzy"?6:buff?.kind==="clot"?0.5:buff?.kind==="buildingSpecial"?buff.mult:buff?.kind==="cursedFinger"?0:1;
  const cps=Math.max(0,baseCps*g.multiplier*upgradeMult*kittenMult*plantMult*buffMult*(1+g.heaven*.05)*(season==="Harvest"?1.15:1)-wrathDrain);
  const grandmaCount=g.buildings.b2||0;
  const stage=g.elderCovenant?0:Math.max(0,Math.min(3,g.elderWrath||0));
